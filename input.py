@@ -40,9 +40,11 @@ def extract_params(inbound_route_params=False, outbound_route_params=False, dema
     if demand:
         stops = load(path_route_stops)
         # arrival rates will be in pax/min
-        arrival_rates, alight_rates, odt = get_demand(path_od, path_stop_times, stops, INPUT_DEM_START_INTERVAL,
+        apc_on_rates, apc_off_rates, odt = get_demand(path_od, path_stop_times, stops, INPUT_DEM_START_INTERVAL,
                                                       INPUT_DEM_END_INTERVAL, DEM_START_INTERVAL, DEM_END_INTERVAL,
                                                       DEM_PROPORTION_INTERVALS, DEM_INTERVAL_LENGTH_MINS, DATES)
+        # print(np.sum(apc_on_rates, axis=-1))
+        # print(np.sum(apc_off_rates, axis=-1))
         save(path_odt_xtr, odt)
     if validation:
         stops = load(path_route_stops)
@@ -92,7 +94,7 @@ def get_params_outbound():
     return trip_times1_params, trip_times2_params, trips1_out_info, trips2_out_info, deadhead_times_params, sched_arrs
 
 
-# extract_params(inbound_route_params=True)
+# extract_params(demand=True)
 
 STOPS, LINK_TIMES_INFO, TRIPS_IN_INFO, ODT, SCHED_ARRS_IN, TRIP_TIMES_INPUT = get_params_inbound()
 TRIP_TIMES1_PARAMS, TRIP_TIMES2_PARAMS, TRIPS1_INFO_OUT, TRIPS2_INFO_OUT, DEADHEAD_TIME_PARAMS, SCHED_ARRS_OUT = get_params_outbound()

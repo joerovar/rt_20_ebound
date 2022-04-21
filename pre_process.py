@@ -176,13 +176,14 @@ def get_demand(path_odt, path_stop_times, stops, input_start_interval, input_end
                     od_set[time_idx, i, j] = pax * 60 / interval_length
     od_scaled_set = np.array(od_set)
     for i in range(od_set.shape[0]):
-        print(od_set[i])
         od_scaled_set[i] = biproportional_fitting(od_set[i], arr_rates[i], drop_rates[i])
+    apc_on_rates = arr_rates
+    apc_off_rates = drop_rates
     warm_up_odt = np.multiply(od_scaled_set[0], 0.6)
     od_scaled_set = np.insert(od_scaled_set, 0, warm_up_odt, axis=0)
     warm_up_odt2 = np.multiply(od_scaled_set[0], 0.3)
     od_scaled_set = np.insert(od_scaled_set, 0, warm_up_odt2, axis=0)
-    return arr_rates, drop_rates, od_scaled_set
+    return apc_on_rates, apc_off_rates, od_scaled_set
 
 
 def biproportional_fitting(od, target_ons, target_offs):
