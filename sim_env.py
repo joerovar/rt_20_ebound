@@ -227,6 +227,9 @@ class DetailedSimulationEnv(SimulationEnv):
     def initialize_pax_demand(self):
         pax_info = {}
         self.stops = []
+        counter = 0
+        counter_od_interv_1 = 0
+        counter_od_interv_2 = 0
         for i in range(len(STOPS)):
             self.stops.append(Stop(STOPS[i]))
             pax_info['arr_times'] = []
@@ -237,7 +240,15 @@ class DetailedSimulationEnv(SimulationEnv):
                     start_edge_interval = k * DEM_INTERVAL_LENGTH_MINS * 60
                     end_edge_interval = start_edge_interval + DEM_INTERVAL_LENGTH_MINS * 60
                     od_rate = ODT[k - POST_PROCESSED_DEM_START_INTERVAL, i, j]
+                    if i < 28 and j > 28:
+                        if k == 7:
+                            if not np.isnan(od_rate):
+                                counter_od_interv_1 += od_rate
+                        if k == 8:
+                            if not np.isnan(od_rate):
+                                counter_od_interv_2 += od_rate
                     if not np.isnan(od_rate):
+                        # max_size = int(np.ceil(od_rate) * (DEM_INTERVAL_LENGTH_MINS / 60) * 10) THIS IS CORRECT WAY BUT TO REPRODUCE RESULTS FOR PAPER
                         max_size = int(od_rate * (DEM_INTERVAL_LENGTH_MINS / 60) * 3)
                         if od_rate > 0:
                             temp_pax_interarr_times = np.random.exponential(3600 / od_rate, size=max_size)
@@ -255,9 +266,15 @@ class DetailedSimulationEnv(SimulationEnv):
                                 pax_info['d_stop_idx'] += [j] * len(temp_pax_arr_times)
             df = pd.DataFrame(pax_info).sort_values(by='arr_times')
             pax_sorted_info = df.to_dict('list')
+            in_orig_df = df[df['o_stop_idx'] < 28]
+            in_orig_df = in_orig_df[in_orig_df['d_stop_idx'] > 28]
+            in_orig_df = in_orig_df[in_orig_df['arr_times'] > FOCUS_START_TIME_SEC]
+            in_orig_df = in_orig_df[in_orig_df['arr_times'] < FOCUS_END_TIME_SEC]
+            counter += in_orig_df.shape[0]
             for o, d, at in zip(pax_sorted_info['o_stop_idx'], pax_sorted_info['d_stop_idx'],
                                 pax_sorted_info['arr_times']):
                 self.stops[i].pax.append(Passenger(o, d, at))
+        print([counter, round(counter_od_interv_1, 1), round(counter_od_interv_2, 1)])
         return
 
     def fixed_stop_unload(self):
