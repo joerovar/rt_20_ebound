@@ -49,10 +49,10 @@ def run_base_control_detailed(replications=2, control_strength=0.7,
     if save_results:
         path_trajectories = 'out/EH/' + tstamp + '-trajectory_set' + ext_var
         path_completed_pax = 'out/EH/' + tstamp + '-pax_set' + ext_var
-        params = {'param': ['control_strength'],
-                  'value': [control_strength]}
-        df_params = pd.DataFrame(params)
-        df_params.to_csv('out/EH/' + tstamp + '-params_used' + ext_var, index=False)
+        # params = {'param': ['control_strength'],
+        #           'value': [control_strength]}
+        # df_params = pd.DataFrame(params)
+        # df_params.to_csv('out/EH/' + tstamp + '-params_used' + ext_csv, index=False)
         save(path_trajectories, trajectories_set)
         save(path_completed_pax, pax_set)
     return
@@ -227,9 +227,6 @@ class DetailedSimulationEnv(SimulationEnv):
     def initialize_pax_demand(self):
         pax_info = {}
         self.stops = []
-        counter = 0
-        counter_od_interv_1 = 0
-        counter_od_interv_2 = 0
         for i in range(len(STOPS)):
             self.stops.append(Stop(STOPS[i]))
             pax_info['arr_times'] = []
@@ -240,13 +237,6 @@ class DetailedSimulationEnv(SimulationEnv):
                     start_edge_interval = k * DEM_INTERVAL_LENGTH_MINS * 60
                     end_edge_interval = start_edge_interval + DEM_INTERVAL_LENGTH_MINS * 60
                     od_rate = ODT[k - POST_PROCESSED_DEM_START_INTERVAL, i, j]
-                    if i < 28 and j > 28:
-                        if k == 7:
-                            if not np.isnan(od_rate):
-                                counter_od_interv_1 += od_rate
-                        if k == 8:
-                            if not np.isnan(od_rate):
-                                counter_od_interv_2 += od_rate
                     if not np.isnan(od_rate):
                         # max_size = int(np.ceil(od_rate) * (DEM_INTERVAL_LENGTH_MINS / 60) * 10) THIS IS CORRECT WAY BUT TO REPRODUCE RESULTS FOR PAPER
                         max_size = int(od_rate * (DEM_INTERVAL_LENGTH_MINS / 60) * 3)
@@ -266,15 +256,9 @@ class DetailedSimulationEnv(SimulationEnv):
                                 pax_info['d_stop_idx'] += [j] * len(temp_pax_arr_times)
             df = pd.DataFrame(pax_info).sort_values(by='arr_times')
             pax_sorted_info = df.to_dict('list')
-            in_orig_df = df[df['o_stop_idx'] < 28]
-            in_orig_df = in_orig_df[in_orig_df['d_stop_idx'] > 28]
-            in_orig_df = in_orig_df[in_orig_df['arr_times'] > FOCUS_START_TIME_SEC]
-            in_orig_df = in_orig_df[in_orig_df['arr_times'] < FOCUS_END_TIME_SEC]
-            counter += in_orig_df.shape[0]
             for o, d, at in zip(pax_sorted_info['o_stop_idx'], pax_sorted_info['d_stop_idx'],
                                 pax_sorted_info['arr_times']):
                 self.stops[i].pax.append(Passenger(o, d, at))
-        print([counter, round(counter_od_interv_1, 1), round(counter_od_interv_2, 1)])
         return
 
     def fixed_stop_unload(self):
@@ -742,12 +726,12 @@ class DetailedSimulationEnvWithControl(DetailedSimulationEnv):
         last_arr_t = self.trip_log[trip_idx-1].stop_arr_times[STOPS[curr_stop_idx]]
         backward_headway = self.get_backward_headway()
         forward_headway = self.time - last_arr_t
-        min_allowed_hw = self.control_strength * CONTROL_MEAN_HW
-        limit_holding = max(0, (last_arr_t + min_allowed_hw) - self.time)
+        # min_allowed_hw = self.control_strength * CONTROL_MEAN_HW
+        # limit_holding = max(0, (last_arr_t + min_allowed_hw) - self.time)
         if stop.stop_id == STOPS[0]:
             if backward_headway > forward_headway:
 
-                holding_time = min(limit_holding, (backward_headway - forward_headway)/2)
+                holding_time = min(LIMIT_HOLDING, (backward_headway - forward_headway)/2)
                 if self.hold_adj_factor > 0.0 and holding_time > 0:
                     holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
                 assert holding_time >= 0
@@ -758,7 +742,7 @@ class DetailedSimulationEnvWithControl(DetailedSimulationEnv):
         else:
             self.fixed_stop_load()
             if backward_headway > forward_headway:
-                holding_time = min(limit_holding, (backward_headway - forward_headway)/2)
+                holding_time = min(LIMIT_HOLDING, (backward_headway - forward_headway)/2)
                 if self.hold_adj_factor > 0.0 and holding_time > 0:
                     holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
                 assert holding_time >= 0

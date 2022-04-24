@@ -155,18 +155,22 @@ class PostProcessor:
 
     def control_actions(self):
         ht_ordered_freq_set = []
+        ht_mean_set = []
         skip_freq_set = []
-        bounds = [(0, 20), (20, 40), (40, 60), (60, 80), (80, 100), (100, 120), (120, np.inf)]
         for i in range(len(self.cp_tags)):
             ht_dist, skip_freq = control_from_trajectory_set('out/trajectories/' + self.cp_tags[i] + '.csv',
                                                              CONTROLLED_STOPS)
             skip_freq_set.append(round(skip_freq, 1))
             ht_dist_arr = np.array(ht_dist)
-            ht_ordered_freq = []
-            for b in bounds:
-                ht_ordered_freq.append(ht_dist_arr[(ht_dist_arr >= b[0]) & (ht_dist_arr < b[1])].size)
-            ht_ordered_freq_set.append(ht_ordered_freq)
-        results = {'skip_freq': skip_freq_set}
+            ht_mean_set.append(ht_dist_arr.mean())
+            if i == 1:
+                ht_dist = np.clip(ht_dist, 0, 100).tolist()
+            ht_ordered_freq_set.append(ht_dist)
+        results = {'skip_freq': skip_freq_set, 'ht_mean': ht_mean_set}
+        plt.hist(ht_ordered_freq_set[1:], color=['black', 'dimgray', 'gray'], label=self.cp_tags[1:], ec='black')
+        plt.legend()
+        plt.savefig(self.path_dir + 'hold_time.png')
+        plt.close()
         return results
 
     def trip_times(self, keep_nc=False, plot=False):
