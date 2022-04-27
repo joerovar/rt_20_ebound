@@ -150,6 +150,6 @@ path_p_ddqn_ha_60_s2_nr = 'out/DDQN-HA/0405-102850-pax_set.pkl'
 path_tr_ddqn_ha_60_s2 = 'out/DDQN-HA/0329-204648-trajectory_set.pkl'
 path_p_ddqn_ha_60_s2 = 'out/DDQN-HA/0329-204648-pax_set.pkl'
 tags_s2 = ['EH (base)', 'DDQN-LA (base)', 'DDQN-HA (base)',
-           'EH (0.8)', 'DDQN-LA (NR+0.8)', 'DDQN-LA (0.8)', 'DDQN-HA (NR+0.8)', 'DDQN-HA (0.8)',
-           'EH (0.6)', 'DDQN-LA (NR+0.6)','DDQN-LA (0.6)', 'DDQN-HA (NR+0.6)','DDQN-HA (0.6)']
+           'EH (0.8)', 'DDQN-LA (NR+0.8)', 'DDQN-LA (0.8)', 'DDQN-HA (NR+0.8)', 'DDQN-HA (R+0.8)',
+           'EH (0.6)', 'DDQN-LA (NR+0.6)','DDQN-LA (0.6)', 'DDQN-HA (NR+0.6)','DDQN-HA (R+0.6)']
 path_dir_s2 = 'out/compare/sensitivity compliance/'
