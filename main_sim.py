@@ -161,6 +161,48 @@ def sensitivity_compliance(compute_rbt=False):
     return
 
 
+def fancy_plots():
+    wt_all_set2 = load(path_dir_s1 + 'wt_numer.pkl')
+    nr_replications = 40
+    nr_methods = 3
+    nr_scenarios = 3
+    idx = [0, 2, 4, 5, 6, 7, 8, 10, 12]
+    wt = list(np.array(wt_all_set2)[idx].flatten())
+
+    method = (['EH'] * nr_replications + ['DDQN-LA'] * nr_replications + ['DDQN-HA'] * nr_replications) * nr_scenarios
+    tt_var = ['low'] * nr_replications * nr_methods + ['base'] * nr_replications * nr_methods + ['high'] * nr_replications * nr_methods
+
+    df_dict = {'tt_var': tt_var, 'method': method, 'wt': wt}
+    df = pd.DataFrame(df_dict)
+    sns.set(style='darkgrid')
+    sns.boxplot(x='tt_var', y='wt', hue='method', data=df, showfliers= False)
+    plt.ylabel('mean wait time')
+    plt.xlabel('run time variability')
+    plt.savefig('out/compare/sensitivity run times/wt_fancy.png')
+    plt.close()
+
+    wt_set = load(path_dir_s2 + 'wt_numer.pkl')
+
+    nr_replications = 40
+    nr_methods = 3
+    nr_scenarios = 3
+    idx = [0, 1, 2, 3, 5, 6, 8, 9, 12]
+    wt = list(np.array(wt_set)[idx].flatten())
+
+    method = (['EH'] * nr_replications + ['DDQN-LA'] * nr_replications + ['DDQN-HA'] * nr_replications) * nr_scenarios
+    compliance = ['1.0'] * nr_replications * nr_methods + ['0.8'] * nr_replications * nr_methods + ['0.6'] * nr_replications * nr_methods
+
+    df_dict = {'compliance degree': compliance, 'method': method, 'wt': wt}
+    df = pd.DataFrame(df_dict)
+    sns.set(style='darkgrid')
+    sns.boxplot(x='compliance degree', y='wt', hue='method', data=df, showfliers= False)
+    plt.ylabel('mean wait time')
+    plt.savefig('out/compare/sensitivity compliance/wt_fancy.png')
+    plt.close()
+    return
+
+
+# fancy_plots()
 # run_base_detailed(replications=2)
 # run_benchmark(base=False, base_control=True)
 # run_benchmark(base=False, base_control=True, control_strength=0.75, tt_factor=0.8)
@@ -168,6 +210,6 @@ def sensitivity_compliance(compute_rbt=False):
 # run_benchmark(base=False, base)
 # weight_comparison(compute_rbt=True)
 # benchmark_comparison(compute_rbt=False)
-sensitivity_run_t(compute_rbt=True)
+# sensitivity_run_t(compute_rbt=False)
 # validate_non_rl(compute_rbt=False)
 # sensitivity_compliance(compute_rbt=True)

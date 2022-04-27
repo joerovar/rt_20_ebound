@@ -49,9 +49,9 @@ class PostProcessor:
                      'wt_0_2': pc_wt_0_2_set,
                      'wt_2_4': pc_wt_2_4_set,
                      'wt_4_inf': pc_wt_4_inf_set}
+        save(self.path_dir + 'wt_numer.pkl', wt_all_set)
         if include_rbt:
             save(self.path_dir + 'rbt_numer.pkl', rbt_od_set)
-        save(self.path_dir + 'wt_numer.pkl', wt_all_set)
 
         return results_d
 
