@@ -296,6 +296,11 @@ def count_load(file_dir, hw_threshold, count_skip=False):
         return avg_prev_hw, avg_prev_load, avg_pk_hw, avg_pk_load
 
 
+# print(count_load('out/NC/0329-155354-trajectory_set.pkl', 7*60))
+# print(count_load('out/EH/0329-155402-trajectory_set.pkl', 7*60))
+
+
+
 def policy():
     sars_set = load('out/DDQN-HA/0329-165457-sars_set.pkl')
     n_stops = len(STOPS)
