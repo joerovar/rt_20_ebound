@@ -284,21 +284,26 @@ def count_load(file_dir, hw_threshold, count_skip=False):
 
     avg_pk_load = np.around(np.mean(peak_load), decimals=2)
     avg_pk_hw = np.around(np.mean(peak_hw)/60, decimals=2)
+    h_pk_load = np.around(np.percentile(peak_load, 95), decimals=2)
+    h_pk_hw = np.around(np.percentile(peak_hw, 95)/60, decimals=2)
     avg_prev_hw = np.around(np.mean(cs_hw)/60, decimals=2)
     avg_prev_load = np.around(np.mean(cs_load), decimals=2)
+    h_prev_hw = np.around(np.percentile(cs_hw, 95)/60, decimals=2)
+    h_prev_load = np.around(np.percentile(cs_load, 95), decimals=2)
     nr_trips = len(peak_load)
     nr_trips_prev = len(cs_load)
     # print(nr_trips, nr_trips_prev)
     if count_skip:
         skipped_freq = round(skipped / (skipped + not_skipped)*100, 2)
-        return avg_prev_hw, avg_prev_load, avg_pk_hw, avg_pk_load, skipped_freq
+        return (avg_prev_hw,h_prev_hw), (avg_prev_load,h_prev_load), (avg_pk_hw,h_pk_hw), (avg_pk_load,h_pk_load), skipped_freq
     else:
-        return avg_prev_hw, avg_prev_load, avg_pk_hw, avg_pk_load
+        return (avg_prev_hw,h_prev_hw), (avg_prev_load,h_prev_load), (avg_pk_hw,h_pk_hw), (avg_pk_load,h_pk_load)
 
 
 # print(count_load('out/NC/0329-155354-trajectory_set.pkl', 7*60))
 # print(count_load('out/EH/0329-155402-trajectory_set.pkl', 7*60))
-
+# print(count_load('out/DDQN-LA/0329-185304-trajectory_set.pkl', 7*60))
+# print(count_load('out/DDQN-HA/0405-014450-trajectory_set.pkl', 7*60, count_skip=True))
 
 
 def policy():
