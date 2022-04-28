@@ -169,14 +169,14 @@ def fancy_plots():
     idx = [0, 2, 4, 5, 6, 7, 8, 10, 12]
     wt = list(np.array(wt_all_set2)[idx].flatten())
 
-    method = (['EH'] * nr_replications + ['DDQN-LA'] * nr_replications + ['DDQN-HA'] * nr_replications) * nr_scenarios
+    method = (['EH'] * nr_replications + ['RL-LA'] * nr_replications + ['RL-HA'] * nr_replications) * nr_scenarios
     tt_var = ['low'] * nr_replications * nr_methods + ['base'] * nr_replications * nr_methods + ['high'] * nr_replications * nr_methods
 
     df_dict = {'tt_var': tt_var, 'method': method, 'wt': wt}
     df = pd.DataFrame(df_dict)
     sns.set(style='darkgrid')
     sns.boxplot(x='tt_var', y='wt', hue='method', data=df, showfliers= False)
-    plt.ylabel('mean wait time')
+    plt.ylabel('mean wait time (min)')
     plt.xlabel('run time variability')
     plt.savefig('out/compare/sensitivity run times/wt_fancy.png')
     plt.close()
@@ -186,23 +186,25 @@ def fancy_plots():
     nr_replications = 40
     nr_methods = 3
     nr_scenarios = 3
-    idx = [0, 1, 2, 3, 5, 6, 8, 9, 12]
+    idx = [0, 1, 2, 3, 5, 6, 8, 9, 11]
     wt = list(np.array(wt_set)[idx].flatten())
 
-    method = (['EH'] * nr_replications + ['DDQN-LA'] * nr_replications + ['DDQN-HA'] * nr_replications) * nr_scenarios
-    compliance = ['1.0'] * nr_replications * nr_methods + ['0.8'] * nr_replications * nr_methods + ['0.6'] * nr_replications * nr_methods
+    method = (['EH'] * nr_replications + ['RL-LA'] * nr_replications + ['RL-HA'] * nr_replications) * nr_scenarios
+    compliance = [100] * nr_replications * nr_methods + [80] * nr_replications * nr_methods + [60] * nr_replications * nr_methods
 
-    df_dict = {'compliance degree': compliance, 'method': method, 'wt': wt}
+    df_dict = {'compliance': compliance, 'method': method, 'wt': wt}
     df = pd.DataFrame(df_dict)
     sns.set(style='darkgrid')
-    sns.boxplot(x='compliance degree', y='wt', hue='method', data=df, showfliers= False)
-    plt.ylabel('mean wait time')
+    sns.boxplot(x='compliance', y='wt', hue='method', data=df, showfliers= False)
+    plt.legend('')
+    plt.xlabel('degree of compliance (%)')
+    plt.ylabel('mean wait time (min)')
     plt.savefig('out/compare/sensitivity compliance/wt_fancy.png')
     plt.close()
     return
 
 
-# fancy_plots()
+fancy_plots()
 # run_base_detailed(replications=2)
 # run_benchmark(base=False, base_control=True)
 # run_benchmark(base=False, base_control=True, control_strength=0.75, tt_factor=0.8)
