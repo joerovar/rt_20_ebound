@@ -204,7 +204,7 @@ def fancy_plots():
     return
 
 
-fancy_plots()
+# fancy_plots()
 # run_base_detailed(replications=2)
 # run_benchmark(base=False, base_control=True)
 # run_benchmark(base=False, base_control=True, control_strength=0.75, tt_factor=0.8)
