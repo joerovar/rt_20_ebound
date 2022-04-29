@@ -58,6 +58,7 @@ def extract_params(inbound_route_params=False, outbound_route_params=False, dema
             (schedule_arr <= FOCUS_END_TIME_SEC) & (schedule_arr >= FOCUS_START_TIME_SEC)].tolist()
         trip_times, headway_in, headway_in_cv = get_trip_times(path_avl, focus_trips, DATES, stops)
         save('in/xtr/trip_times_inbound.pkl', trip_times)
+        print(len(trip_times))
         save('in/xtr/departure_headway_inbound.pkl', headway_in)
         save('in/xtr/cv_headway_inbound.pkl', headway_in_cv)
         load_profile, ons, offs = get_load_profile(path_stop_times, focus_trips, stops)
@@ -94,7 +95,7 @@ def get_params_outbound():
     return trip_times1_params, trip_times2_params, trips1_out_info, trips2_out_info, deadhead_times_params, sched_arrs
 
 
-# extract_params(demand=True)
+# extract_params(validation=True)
 
 STOPS, LINK_TIMES_INFO, TRIPS_IN_INFO, ODT, SCHED_ARRS_IN, TRIP_TIMES_INPUT = get_params_inbound()
 TRIP_TIMES1_PARAMS, TRIP_TIMES2_PARAMS, TRIPS1_INFO_OUT, TRIPS2_INFO_OUT, DEADHEAD_TIME_PARAMS, SCHED_ARRS_OUT = get_params_outbound()
