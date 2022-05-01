@@ -90,7 +90,6 @@ class PostProcessor:
             x = np.arange(len(idx_control_stops))
             width = 0.1
             fig, ax = plt.subplots()
-            print(cv_tp_set)
             bar1 = ax.bar(x - 3 * width / 2, cv_tp_set[0], width, label=tags[0], color='white', edgecolor='black')
             bar2 = ax.bar(x - width / 2, cv_tp_set[1], width, label=tags[1], color='silver', edgecolor='black')
             bar3 = ax.bar(x + width / 2, cv_tp_set[2], width, label=tags[2], color='gray', edgecolor='black')
@@ -159,14 +158,30 @@ class PostProcessor:
         skip_freq_set = []
         for i in range(len(self.cp_tags)):
             ht_dist, skip_freq = control_from_trajectory_set('out/trajectories/' + self.cp_tags[i] + '.csv',
-                                                             CONTROLLED_STOPS)
+                                                             CONTROLLED_STOPS, control_stop_idx=3)
             skip_freq_set.append(round(skip_freq, 1))
             ht_dist_arr = np.array(ht_dist)
-            ht_mean_set.append(ht_dist_arr.mean())
+            ht_mean_set.append(np.mean(ht_dist_arr[ht_dist_arr>0]))
             if i == 1:
                 ht_dist = np.clip(ht_dist, 0, 100).tolist()
             ht_ordered_freq_set.append(ht_dist)
         results = {'skip_freq': skip_freq_set, 'ht_mean': ht_mean_set}
+
+        print(results['ht_mean'])
+        eh_ht_hist = np.array(ht_ordered_freq_set[1])
+        held_eh = eh_ht_hist[eh_ht_hist>0].size
+        percent = held_eh / eh_ht_hist.size
+        print(percent*100)
+        rl_ht_hist = np.array(ht_ordered_freq_set[3])
+        held_rl = rl_ht_hist[rl_ht_hist>0].size
+        percent = held_rl / rl_ht_hist.size
+        print(percent*100)
+
+        rl2_ht_hist = np.array(ht_ordered_freq_set[2])
+        held_rl2 = rl2_ht_hist[rl2_ht_hist>0].size
+        percent = held_rl2 / rl2_ht_hist.size
+        print(percent*100)
+
         plt.hist(ht_ordered_freq_set[1:], color=['black', 'dimgray', 'gray'], label=self.cp_tags[1:], ec='black')
         plt.legend()
         plt.savefig(self.path_dir + 'hold_time.png')

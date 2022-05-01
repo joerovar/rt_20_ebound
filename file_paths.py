@@ -64,10 +64,10 @@ tags_w = ['3', '5', '7', '9', '11']
 path_tr_nc_b = 'out/NC/0329-155354-trajectory_set.pkl'
 path_p_nc_b = 'out/NC/0329-155354-pax_set.pkl'
 
-path_tr_eh_b = 'out/EH/0329-155402-trajectory_set.pkl'
-path_p_eh_b = 'out/EH/0329-155402-pax_set.pkl'
-# path_tr_eh_b = 'out/EH/0424-160759-trajectory_set.pkl'
-# path_p_eh_b = 'out/EH/0424-160759-pax_set.pkl'
+# path_tr_eh_b = 'out/EH/0329-155402-trajectory_set.pkl'
+# path_p_eh_b = 'out/EH/0329-155402-pax_set.pkl'
+path_tr_eh_b = 'out/EH/0501-111539-trajectory_set.pkl'
+path_p_eh_b = 'out/EH/0501-111539-pax_set.pkl'
 
 
 path_tr_ddqn_la_b = 'out/DDQN-LA/0329-185304-trajectory_set.pkl'

@@ -273,10 +273,13 @@ def plot_5_trip_t_dist(all_trip_t, tags, path_save):
     return
 
 
-def control_from_trajectory_set(df_path, controlled_stops):
+def control_from_trajectory_set(df_path, controlled_stops, control_stop_idx = None):
     df = pd.read_csv(df_path)
     df['stop_id'] = df['stop_id'].astype(str)
-    df_control = df[df['stop_id'] == controlled_stops[2]]
+    if control_stop_idx:
+        df_control = df[df['stop_id'] == controlled_stops[control_stop_idx]]
+    else:
+        df_control = df[df['stop_id'].isin(controlled_stops)]
     # print(df_control)
     hold_times = df_control['hold_time'].tolist()
     # nr_trips = len(df['trip_id'].unique().tolist()) * df['replication'].max()

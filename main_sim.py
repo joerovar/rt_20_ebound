@@ -162,12 +162,13 @@ def sensitivity_compliance(compute_rbt=False):
 
 
 # run_base_detailed(replications=2)
+# run_base_control_detailed(replications=1, save_results=False)
 # run_benchmark(base=False, base_control=True)
 # run_benchmark(base=False, base_control=True, control_strength=0.75, tt_factor=0.8)
 # run_benchmark(base=False, base_control=True, control_strength=0.75, tt_factor=1.2)
 # run_benchmark(base=False, base)
 # weight_comparison(compute_rbt=True)
-# benchmark_comparison(compute_rbt=False)
-sensitivity_run_t(compute_rbt=True)
+benchmark_comparison(compute_rbt=False)
+# sensitivity_run_t(compute_rbt=True)
 # validate_non_rl(compute_rbt=False)
 # sensitivity_compliance(compute_rbt=True)

@@ -42,6 +42,9 @@ def run_base_control_detailed(replications=2, control_strength=0.7,
         done = env.reset_simulation()
         while not done:
             done = env.prep()
+        # held = env.hold_ts[env.hold_ts > 0].size
+        # percent_held = held / env.hold_ts.size * 100
+        # print(percent_held)
         if save:
             env.process_results()
             trajectories_set.append(env.trajectories)
@@ -714,6 +717,7 @@ class DetailedSimulationEnvWithControl(DetailedSimulationEnv):
     def __init__(self, control_strength=0.7, *args, **kwargs):
         super(DetailedSimulationEnvWithControl, self).__init__(*args, **kwargs)
         self.control_strength = control_strength
+        self.hold_ts = np.array([])
 
     def decide_bus_holding(self):
         # CHANGE------------
@@ -728,27 +732,44 @@ class DetailedSimulationEnvWithControl(DetailedSimulationEnv):
         forward_headway = self.time - last_arr_t
         # min_allowed_hw = self.control_strength * CONTROL_MEAN_HW
         # limit_holding = max(0, (last_arr_t + min_allowed_hw) - self.time)
+        # holding_times = np.array([])
         if stop.stop_id == STOPS[0]:
-            if backward_headway > forward_headway:
+            # if backward_headway > forward_headway:
+            #     holding_time = min(LIMIT_HOLDING, (backward_headway - forward_headway)/2)
+            #     if self.hold_adj_factor > 0.0 and holding_time > 0:
+            #         holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
+            #     assert holding_time >= 0
+            #     self.inbound_dispatch(hold=holding_time)
+            # else:
+            #     self.inbound_dispatch()
 
-                holding_time = min(LIMIT_HOLDING, (backward_headway - forward_headway)/2)
-                if self.hold_adj_factor > 0.0 and holding_time > 0:
-                    holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
-                assert holding_time >= 0
-                self.inbound_dispatch(hold=holding_time)
-            else:
-                self.inbound_dispatch()
+            holding_time = min(LIMIT_HOLDING, max((backward_headway - forward_headway)/2, 0))
+            if self.hold_adj_factor > 0.0 and holding_time > 0:
+                holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
+            assert holding_time >= 0
+            if self.bus.active_trip[0].trip_id in FOCUS_TRIPS:
+                self.hold_ts = np.append(self.hold_ts, holding_time)
+            self.inbound_dispatch(hold=holding_time)
 
         else:
+            # self.fixed_stop_load()
+            # if backward_headway > forward_headway:
+            #     holding_time = min(LIMIT_HOLDING, (backward_headway - forward_headway)/2)
+            #     if self.hold_adj_factor > 0.0 and holding_time > 0:
+            #         holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
+            #     assert holding_time >= 0
+            #     self.fixed_stop_depart(hold=holding_time)
+            # else:
+            #     self.fixed_stop_depart()
             self.fixed_stop_load()
-            if backward_headway > forward_headway:
-                holding_time = min(LIMIT_HOLDING, (backward_headway - forward_headway)/2)
-                if self.hold_adj_factor > 0.0 and holding_time > 0:
-                    holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
-                assert holding_time >= 0
-                self.fixed_stop_depart(hold=holding_time)
-            else:
-                self.fixed_stop_depart()
+            holding_time = min(LIMIT_HOLDING, max((backward_headway - forward_headway)/2,0))
+            if self.hold_adj_factor > 0.0 and holding_time > 0:
+                holding_time = np.random.uniform(self.hold_adj_factor * holding_time, holding_time)
+            assert holding_time >= 0
+            if self.bus.active_trip[0].trip_id in FOCUS_TRIPS:
+                self.hold_ts = np.append(self.hold_ts, holding_time)
+            self.fixed_stop_depart(hold=holding_time)
+
         return
 
     def prep(self):
