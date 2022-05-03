@@ -161,6 +161,73 @@ def sensitivity_compliance(compute_rbt=False):
     return
 
 
+def fancy_plots():
+    wt_all_set2 = load(path_dir_s1 + 'wt_numer.pkl')
+    nr_replications = 40
+    nr_methods = 3
+    nr_scenarios = 3
+    # retraining
+    # idx = [0, 2, 4, 5, 6, 7, 8, 9, 12]
+    # no retraining
+    idx = [0, 1, 3, 5, 6, 7, 8, 9, 11]
+    wt = list(np.array(wt_all_set2)[idx].flatten())
+
+    method = (['EH'] * nr_replications + ['RL-LA'] * nr_replications + ['RL-HA'] * nr_replications) * nr_scenarios
+    tt_var = ['low'] * nr_replications * nr_methods + ['base'] * nr_replications * nr_methods + ['high'] * nr_replications * nr_methods
+
+    df_dict = {'tt_var': tt_var, 'method': method, 'wt': wt}
+    df = pd.DataFrame(df_dict)
+    sns.set(style='darkgrid')
+    sns.boxplot(x='tt_var', y='wt', hue='method', data=df, showfliers= False, palette='Greys')
+    plt.ylabel('mean wait time (min)')
+    plt.xlabel('run time variability')
+    plt.savefig('out/compare/sensitivity run times/wt_fancy.png')
+    plt.close()
+
+    wt_set = load(path_dir_s2 + 'wt_numer.pkl')
+
+    nr_replications = 40
+    nr_methods = 3
+    nr_scenarios = 3
+    # retraining
+    # idx = [0, 1, 2, 3, 5, 7, 8, 10, 12]
+    # no retraining
+    idx = [0, 1, 2, 3, 4, 6, 8, 9, 11]
+    wt = list(np.array(wt_set)[idx].flatten())
+
+    method = (['EH'] * nr_replications + ['RL-LA'] * nr_replications + ['RL-HA'] * nr_replications) * nr_scenarios
+    compliance = [100] * nr_replications * nr_methods + [80] * nr_replications * nr_methods + [60] * nr_replications * nr_methods
+
+    df_dict = {'compliance': compliance, 'method': method, 'wt': wt}
+    df = pd.DataFrame(df_dict)
+    sns.set(style='darkgrid')
+    sns.boxplot(x='compliance', y='wt', hue='method', data=df, showfliers= False, palette='Greys')
+    plt.legend()
+    plt.xlabel('degree of compliance (%)')
+    plt.ylabel('mean wait time (min)')
+    plt.savefig('out/compare/sensitivity compliance/wt_fancy.png')
+    plt.close()
+
+    fig, ax = plt.subplots(ncols=2)
+    wt_set_b = load(path_dir_b + 'wt_numer.pkl')
+    rbt_set_b = load(path_dir_b + 'rbt_numer.pkl')
+    wt = list(np.array(wt_set_b).flatten())
+    rbt = list(np.array(rbt_set_b).flatten())
+    method = (['NC']*nr_replications + ['EH'] * nr_replications + ['RL-LA'] * nr_replications + ['RL-HA'] * nr_replications)
+    df_dict = {'method': method, 'wt': wt, 'rbt': rbt}
+    df = pd.DataFrame(df_dict)
+    sns.set(style='darkgrid')
+    sns.boxplot(data=df, x='method', y='wt' ,ax=ax[0], showfliers=False, palette='Greys')
+    sns.boxplot(data=df,x='method', y='rbt' ,ax=ax[1], showfliers=False, palette='Greys')
+    ax[0].set_ylabel('mean wait time (min)')
+    ax[1].set_ylabel('mean RBT (min)')
+    plt.tight_layout()
+    plt.savefig('out/compare/benchmark/pax_times_fancy.png')
+    plt.close()
+    return
+
+
+fancy_plots()
 # run_base_detailed(replications=2)
 # run_base_control_detailed(replications=1, save_results=False)
 # run_benchmark(base=False, base_control=True)
@@ -168,7 +235,7 @@ def sensitivity_compliance(compute_rbt=False):
 # run_benchmark(base=False, base_control=True, control_strength=0.75, tt_factor=1.2)
 # run_benchmark(base=False, base)
 # weight_comparison(compute_rbt=True)
-benchmark_comparison(compute_rbt=False)
+# benchmark_comparison(compute_rbt=False)
 # sensitivity_run_t(compute_rbt=True)
 # validate_non_rl(compute_rbt=False)
 # sensitivity_compliance(compute_rbt=True)

@@ -104,6 +104,21 @@ class PostProcessor:
             plt.savefig(self.path_dir + 'cv_hw_bar.png')
             plt.close()
 
+            fig, ax = plt.subplots()
+            bar1 = ax.bar(x - 3 * width / 2, cv_tp_set[0], width, label='NC', color='white', edgecolor='black')
+            bar2 = ax.bar(x - width / 2, cv_tp_set[1], width, label='EH', color='silver', edgecolor='black')
+            bar3 = ax.bar(x + width / 2, cv_tp_set[2], width, label='RL-LA', color='gray', edgecolor='black')
+            bar4 = ax.bar(x + 3 * width / 2, cv_tp_set[3], width, label='RL-HA', color='black', edgecolor='black')
+
+            ax.set_ylabel('coefficient of variation of headway')
+            ax.set_xlabel('control stop')
+            ax.set_xticks(x, idx_control_stops)
+            ax.legend()
+
+            fig.tight_layout()
+            plt.savefig(self.path_dir + 'cv_hw_bar_present.png')
+            plt.close()
+
         return results_hw
 
     def load_profile(self):

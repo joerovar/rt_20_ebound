@@ -249,6 +249,25 @@ def plot_4_trip_t_dist(all_trip_t, tags, path_save):
     plt.tight_layout()
     plt.savefig(path_save + 'trip_t_dist.png')
     plt.close()
+
+    i = 0
+    tags_2 = ['NC', 'EH', 'RL-LA', 'RL-HA']
+    fig, axs = plt.subplots(2, 2, sharex='all', sharey='all')
+    for temp_trip_t in all_trip_t:
+        sns.histplot([t / 60 for t in temp_trip_t], kde=True, color='gray', alpha=0.5, ax=axs.flat[i])
+        axs.flat[i].axvline(np.percentile(temp_trip_t, 95) / 60, color='black', linestyle='dashed', alpha=0.7)
+        axs.flat[i].set_title(tags_2[i], fontsize=9)
+        if i > 1:
+            axs.flat[i].set_xlabel('total trip run time (min)', fontsize=8)
+        i += 1
+    plt.xlim(60, 81)
+    for ax in axs.flat:
+        ax.tick_params(labelsize=8)
+        ax.set_ylabel('frequency', fontsize=8)
+    # plt.tick_params(labelsize=9)
+    plt.tight_layout()
+    plt.savefig(path_save + 'trip_t_dist_present.png')
+    plt.close()
     return
 
 
@@ -538,21 +557,18 @@ def plot_headway(cv_hw_set, ordered_stops, lbls, colors, pathname=None, controll
 def plot_load_profile_grid(lp_set, lp_max_set, lp_min_set, os, tags, pathname=None):
     x1 = np.arange(len(os))
     fig, axs = plt.subplots(2, 2, sharex='all', sharey='all')
-    # obj = []
     i = 0
     for ax in axs.flat:
         ax.plot(x1, lp_max_set[i], label='95-th', color='black')
         ax.plot(x1, lp_set[i], label='median', color='dimgray')
         ax.plot(x1, lp_min_set[i], label='10-th', color='silver')
         ax.plot(x1, [50] * len(os), label='capacity', color='black', linestyle='dashed')
-        # obj.append([obj1, obj2, obj3, obj4])
         ax.set_title(tags[i], fontsize=9)
         ax.grid(axis='y')
         ax.set_ylabel('load (pax)', fontsize=9)
         if i > 1:
             ax.set_xlabel('stop', fontsize=9)
         ax.set_xticks(np.arange(10, 70, 10))
-        # ax.set_xticklabels(x1+1)
         ax.tick_params(labelsize=9)
         i += 1
     plt.xlim(0, 67)
@@ -562,6 +578,33 @@ def plot_load_profile_grid(lp_set, lp_max_set, lp_min_set, os, tags, pathname=No
     # plt.tight_layout()
     if pathname:
         fig.savefig(pathname, bbox_extra_artists=(lgd,), bbox_inches='tight')
+    else:
+        plt.show()
+    plt.close()
+
+    tags2 = ['NC', 'EH', 'RL-LA', 'RL-HA']
+    fig, axs = plt.subplots(2, 2, sharex='all', sharey='all')
+    i = 0
+    for ax in axs.flat:
+        ax.plot(x1, lp_max_set[i], label='95-th', color='black')
+        ax.plot(x1, lp_set[i], label='median', color='dimgray')
+        ax.plot(x1, lp_min_set[i], label='10-th', color='silver')
+        ax.plot(x1, [50] * len(os), label='capacity', color='black', linestyle='dashed')
+        ax.set_title(tags2[i], fontsize=9)
+        ax.grid(axis='y')
+        ax.set_ylabel('load (pax)', fontsize=9)
+        if i > 1:
+            ax.set_xlabel('stop', fontsize=9)
+        ax.set_xticks(np.arange(10, 70, 10))
+        ax.tick_params(labelsize=9)
+        i += 1
+    plt.xlim(0, 67)
+    handles, labels = axs.flat[-1].get_legend_handles_labels()
+    lgd = axs.flat[-1].legend(handles, labels, bbox_to_anchor=(-0.15, -0.3),
+                         loc='upper center', fontsize=9, ncol=4, columnspacing=0.8)
+    # plt.tight_layout()
+    if pathname:
+        fig.savefig('out/compare/benchmark/lp_grid_present.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
     else:
         plt.show()
     plt.close()
