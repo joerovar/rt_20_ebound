@@ -208,7 +208,8 @@ def fancy_plots():
     plt.savefig('out/compare/sensitivity compliance/wt_fancy.png')
     plt.close()
 
-    fig, ax = plt.subplots(ncols=2)
+    # fig, ax = plt.subplots(ncols=2)
+    # plt.subplots_adjust(left=0.1, right=0.9)
     wt_set_b = load(path_dir_b + 'wt_numer.pkl')
     rbt_set_b = load(path_dir_b + 'rbt_numer.pkl')
     wt = list(np.array(wt_set_b).flatten())
@@ -217,12 +218,16 @@ def fancy_plots():
     df_dict = {'method': method, 'wt': wt, 'rbt': rbt}
     df = pd.DataFrame(df_dict)
     sns.set(style='darkgrid')
-    sns.boxplot(data=df, x='method', y='wt' ,ax=ax[0], showfliers=False, palette='Greys')
-    sns.boxplot(data=df,x='method', y='rbt' ,ax=ax[1], showfliers=False, palette='Greys')
-    ax[0].set_ylabel('average wait time (min)')
-    ax[1].set_ylabel('RBT (min)')
+    sns.boxplot(data=df, x='method', y='wt', showfliers=False, palette='Greys')
+
+    plt.ylabel('average wait time (min)')
     plt.tight_layout()
-    plt.savefig('out/compare/benchmark/pax_times_fancy.png')
+    plt.savefig('out/compare/benchmark/wt_fancy.png')
+    plt.close()
+    sns.boxplot(data=df, x='method', y='rbt', showfliers=False, palette='Greys')
+    plt.ylabel('RBT (min)')
+    plt.tight_layout()
+    plt.savefig('out/compare/benchmark/rbt_fancy.png')
     plt.close()
     return
 
