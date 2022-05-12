@@ -179,7 +179,7 @@ def fancy_plots():
     df = pd.DataFrame(df_dict)
     sns.set(style='darkgrid')
     sns.boxplot(x='tt_var', y='wt', hue='method', data=df, showfliers= False, palette='Greys')
-    plt.ylabel('mean wait time (min)')
+    plt.ylabel('average wait time (min)')
     plt.xlabel('run time variability')
     plt.savefig('out/compare/sensitivity run times/wt_fancy.png')
     plt.close()
@@ -190,13 +190,13 @@ def fancy_plots():
     nr_methods = 3
     nr_scenarios = 3
     # retraining
-    # idx = [0, 1, 2, 3, 5, 7, 8, 10, 12]
+    idx = [0, 1, 2, 3, 5, 12, 8, 10, 7]
     # no retraining
-    idx = [0, 1, 2, 3, 4, 6, 8, 9, 11]
+    # idx = [0, 1, 2, 3, 4, 6, 8, 9, 11]
     wt = list(np.array(wt_set)[idx].flatten())
 
     method = (['EH'] * nr_replications + ['RL-LA'] * nr_replications + ['RL-HA'] * nr_replications) * nr_scenarios
-    compliance = [100] * nr_replications * nr_methods + [80] * nr_replications * nr_methods + [60] * nr_replications * nr_methods
+    compliance = ['100'] * nr_replications * nr_methods + ['80'] * nr_replications * nr_methods + ['60'] * nr_replications * nr_methods
 
     df_dict = {'compliance': compliance, 'method': method, 'wt': wt}
     df = pd.DataFrame(df_dict)
@@ -204,7 +204,7 @@ def fancy_plots():
     sns.boxplot(x='compliance', y='wt', hue='method', data=df, showfliers= False, palette='Greys')
     plt.legend()
     plt.xlabel(r'degree of compliance $\alpha$ (%)')
-    plt.ylabel('mean wait time (min)')
+    plt.ylabel('average wait time (min)')
     plt.savefig('out/compare/sensitivity compliance/wt_fancy.png')
     plt.close()
 
