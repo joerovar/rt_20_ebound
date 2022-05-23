@@ -48,7 +48,8 @@ class PostProcessor:
                      'denied_per_mil': [round(db * 1000, 2) for db in db_mean],
                      'wt_0_2': pc_wt_0_2_set,
                      'wt_2_4': pc_wt_2_4_set,
-                     'wt_4_inf': pc_wt_4_inf_set}
+                     'wt_4_inf': pc_wt_4_inf_set,
+                     'db_wt_mean': [np.around(wt_s/60, decimals=2) for wt_s in dbwt_mean]}
         save(self.path_dir + 'wt_numer.pkl', wt_all_set)
         if include_rbt:
             save(self.path_dir + 'rbt_numer.pkl', rbt_od_set)
@@ -279,19 +280,33 @@ def count_load(file_dir, hw_threshold, count_skip=False):
     peak_load = []
     cs_hw = []
     peak_hw = []
+    back_hw_skipped = []
     trajectory_set = load(file_dir)
     activate = False
     skipped = 0
     not_skipped = 0
+    count_all_pax = 0
+    denied_count = 0
+    # denied_pk_count = 0
+    denied_hw = []
     for trajectory in trajectory_set:
         last_t = None
         last_t_pk = None
+        prev_skipped = False
+        prev_denied = False
         for trip in trajectory:
             for stop_info in trajectory[trip]:
                 if stop_info[0] == STOPS[47]:
+                    count_all_pax += stop_info[IDX_PICK]
                     arr_t = stop_info[IDX_ARR_T]
                     if last_t:
                         hw = arr_t - last_t
+                        if prev_skipped:
+                            prev_skipped = False
+                            back_hw_skipped.append(hw)
+                        if prev_denied:
+                            denied_hw.append(hw)
+                            prev_denied = False
                         if hw > hw_threshold:
                             if count_skip:
                                 if stop_info[IDX_SKIPPED]:
@@ -303,6 +318,11 @@ def count_load(file_dir, hw_threshold, count_skip=False):
                             activate = True
                         else:
                             activate = False
+                    if stop_info[IDX_SKIPPED]:
+                        prev_skipped = True
+                    if stop_info[IDX_DENIED] > 0:
+                        denied_count += stop_info[IDX_DENIED]
+                        prev_denied = True
                     last_t = deepcopy(arr_t)
                 if activate and stop_info[0] == STOPS[56]:
                     peak_load.append(stop_info[IDX_LOAD])
@@ -321,55 +341,33 @@ def count_load(file_dir, hw_threshold, count_skip=False):
     h_prev_hw = np.around(np.percentile(cs_hw, 95)/60, decimals=2)
     h_prev_load = np.around(np.percentile(cs_load, 95), decimals=2)
 
+    # print(f'{skipped} ?= {len(back_hw_skipped)}')
+
     if count_skip:
         skipped_freq = round(skipped / (skipped + not_skipped)*100, 2)
-        return (avg_prev_hw,h_prev_hw), (avg_prev_load,h_prev_load), (avg_pk_hw,h_pk_hw), (avg_pk_load,h_pk_load), skipped_freq
+        return (avg_prev_hw,h_prev_hw), (avg_prev_load,h_prev_load), (avg_pk_hw,h_pk_hw), (avg_pk_load, h_pk_load), (skipped_freq, back_hw_skipped), (count_all_pax, denied_count, denied_hw)
     else:
-        return (avg_prev_hw,h_prev_hw), (avg_prev_load,h_prev_load), (avg_pk_hw,h_pk_hw), (avg_pk_load,h_pk_load)
+        return (avg_prev_hw,h_prev_hw), (avg_prev_load,h_prev_load), (avg_pk_hw,h_pk_hw), (avg_pk_load, h_pk_load), (count_all_pax, denied_count, denied_hw)
 
 
 def policy():
-    sars_set = load('out/DDQN-HA/0329-165457-sars_set.pkl')
-    n_stops = len(STOPS)
-    rt_progress = [STOPS.index(c) / n_stops for c in CONTROLLED_STOPS[:-1]]
-    control_stops = [STOPS.index(c) + 1 for c in CONTROLLED_STOPS[:-1]]
-    d = {'stop': [], 'fw_h': [], 'bw_h': [], 'action': []}
-    d2 = {'stop': [], 'fw_h': [], 'load': [], 'action': []}
-    for sars_rep in sars_set:
-        for trip in sars_rep:
-            for sars in sars_rep[trip]:
-                d['stop'].append(round(sars[0][IDX_RT_PROGRESS] * n_stops) + 1)
-                d['fw_h'].append(sars[0][IDX_FW_H])
-                d['bw_h'].append(sars[0][IDX_BW_H])
-                d['action'].append(sars[1])
-                if sars[1] == 0 and trip in FOCUS_TRIPS:
-                    d2['stop'].append(round(sars[0][0]*n_stops+1))
-                    d2['fw_h'].append(sars[0][IDX_FW_H])
-                    d2['load'].append(sars[0][IDX_LOAD_RL])
-                    d2['action'].append(sars[1])
-
-    denied_df = pd.DataFrame(d2)
-
-    d_subset = denied_df[denied_df['stop'] == 48]
-    freq_skip_end = round(d_subset.shape[0]/denied_df.shape[0] * 100, 2)
-    freq_skip_start = round((denied_df.shape[0] - d_subset.shape[0]) / denied_df.shape[0] * 100, 2)
-    avg_load = round(d_subset['load'].mean(), 2)
-    avg_fw_h = round(d_subset['fw_h'].mean()/60, 2)
-
-    denied_df.to_csv('out/compare/denied_policy.csv', index=False)
-    trajectory_set = load('out/DDQN-HA/0329-165457-trajectory_set.pkl')
-    skipped_trips = []
-    reps = []
-    peak_load = []
-
     hw_threshold = 7*60
-    eh_prev_hw, eh_prev_load, eh_pk_hw, eh_pk_load = count_load('out/EH/0329-155402-trajectory_set.pkl', hw_threshold)
-    ddqn_la_prev_hw, ddqn_la_prev_load, ddqn_la_pk_hw, ddqn_la_pk_load = count_load('out/DDQN-LA/0329-185304-trajectory_set.pkl', hw_threshold)
-    ddqn_ha_prev_hw, ddqn_ha_prev_load, ddqn_ha_pk_hw, ddqn_ha_pk_load, skipped_freq = count_load('out/DDQN-HA/0405-014450-trajectory_set.pkl', hw_threshold, count_skip=True)
+    nc_prev_hw, nc_prev_load, nc_pk_hw, nc_pk_load, nc_denied_info = count_load('out/EH/0329-155402-trajectory_set.pkl', hw_threshold)
+    eh_prev_hw, eh_prev_load, eh_pk_hw, eh_pk_load, eh_denied_info = count_load('out/EH/0329-155402-trajectory_set.pkl', hw_threshold)
+    ddqn_la_prev_hw, ddqn_la_prev_load, ddqn_la_pk_hw, ddqn_la_pk_load, ddqn_la_denied_info = count_load('out/DDQN-LA/0329-185304-trajectory_set.pkl', hw_threshold)
+    ddqn_ha_prev_hw, ddqn_ha_prev_load, ddqn_ha_pk_hw, ddqn_ha_pk_load, skipped_info, ddqn_ha_denied_info = count_load('out/DDQN-HA/0405-014450-trajectory_set.pkl', hw_threshold, count_skip=True)
 
-    print(eh_prev_hw, eh_prev_load, eh_pk_hw, eh_pk_load)
-    print(ddqn_la_prev_hw, ddqn_la_prev_load, ddqn_la_pk_hw, ddqn_la_pk_load)
-    print(ddqn_ha_prev_hw, ddqn_ha_prev_load, ddqn_ha_pk_hw, ddqn_ha_pk_load, skipped_freq)
-
+    print(nc_prev_hw, nc_prev_load, nc_pk_hw, nc_pk_load, nc_denied_info[0:2])
+    print(eh_prev_hw, eh_prev_load, eh_pk_hw, eh_pk_load, eh_denied_info[0:2])
+    print(ddqn_la_prev_hw, ddqn_la_prev_load, ddqn_la_pk_hw, ddqn_la_pk_load, ddqn_la_denied_info[0:2])
+    print(ddqn_ha_prev_hw, ddqn_ha_prev_load, ddqn_ha_pk_hw, ddqn_ha_pk_load, skipped_info[0], ddqn_ha_denied_info[0:2])
+    # back_hw = np.array(skipped_info[1])
+    # back_hw = back_hw[back_hw < 70]
+    # back_hw = np.append(back_hw, np.zeros(8), axis=0)
+    #
+    # plt.hist(back_hw, density=True, color='gray', ec='black', bins=8)
+    # plt.xlabel('backward headway of skipped trips (seconds)')
+    # plt.savefig()
     return
 
+# policy()

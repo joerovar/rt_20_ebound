@@ -86,7 +86,7 @@ def benchmark_comparison(compute_rbt=False):
                         path_dir_b)
 
     prc.pax_profile_base()
-    prc.sample_trajectories()
+    prc.write_trajectories()
     results = {}
     results.update(prc.pax_times_fast(include_rbt=compute_rbt))
 
@@ -232,7 +232,7 @@ def fancy_plots():
     return
 
 
-fancy_plots()
+# fancy_plots()
 # run_base_detailed(replications=2)
 # run_base_control_detailed(replications=1, save_results=False)
 # run_benchmark(base=False, base_control=True)
@@ -240,7 +240,7 @@ fancy_plots()
 # run_benchmark(base=False, base_control=True, control_strength=0.75, tt_factor=1.2)
 # run_benchmark(base=False, base)
 # weight_comparison(compute_rbt=True)
-# benchmark_comparison(compute_rbt=False)
+benchmark_comparison(compute_rbt=False)
 # sensitivity_run_t(compute_rbt=True)
 # validate_non_rl(compute_rbt=False)
 # sensitivity_compliance(compute_rbt=True)
