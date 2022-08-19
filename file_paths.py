@@ -77,7 +77,7 @@ path_tr_ddqn_ha_b = 'out/DDQN-HA/0405-014450-trajectory_set.pkl'
 path_p_ddqn_ha_b = 'out/DDQN-HA/0405-014450-pax_set.pkl'
 
 path_dir_b = 'out/compare/benchmark/'
-tags_b = ['NC', 'EH', 'DDQN-LA', 'DDQN-HA']
+tags_b = ['NC', 'EH', 'RL-LA', 'RL-HA']
 
 # SENSITIVITY RUN TIMES
 path_tr_eh_base_s1 = 'out/EH/0329-155402-trajectory_set.pkl'
